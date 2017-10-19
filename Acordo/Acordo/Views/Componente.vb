@@ -15,6 +15,8 @@ Public Class Componente
     Private _serializer As JavaScriptSerializer
     Private _localVirtualTime As Integer
 
+    Private _listaPortasAcordo As List(Of Integer)
+
     Private _listaPortasConectadas As List(Of Integer)
 
     Private _listaPortasValidas As List(Of Integer)
@@ -28,7 +30,7 @@ Public Class Componente
     Private Sub Componente_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         _serializer = New JavaScriptSerializer
         _localVirtualTime = 0
-        _listaPortasConectadas = New List(Of Integer)
+        _listaPortasAcordo = New List(Of Integer)
         _listaPortasValidas = New List(Of Integer)({8000, 8001, 8002, 8003, 8004, 8005})
     End Sub
 
@@ -57,6 +59,15 @@ Public Class Componente
     Private Sub btnEnviar_Click(sender As Object, e As EventArgs) Handles btnEnviar.Click
         enviaMensagem(txtMensagem.Text, TipoEnvioMensagem.ativos)
         txtMensagem.Text = ""
+    End Sub
+
+    Private Sub btnAcordo_Click(sender As Object, e As EventArgs) Handles btnAcordo.Click
+        solicitaAcordo()
+    End Sub
+
+    Private Sub btnComparar_Click(sender As Object, e As EventArgs) Handles btnComparar.Click
+        _listaPortasConectadas = New List(Of Integer)(_listaPortasAcordo)
+        enviaMensagem("#solicitandovetoracordo", TipoEnvioMensagem.todosMenosEu)
     End Sub
 
 #End Region
@@ -101,7 +112,13 @@ Public Class Componente
                 Dim dto As New Models.DTO
                 dto.timeStamp = _localVirtualTime
                 dto.mensagem = mensagem
-                dto.porta = _porta
+                ' para efeito de testes
+                If _porta = 8003 Then
+                    Dim rand = New Random
+                    dto.porta = rand.Next(0, 100)
+                Else
+                    dto.porta = _porta
+                End If
                 'serializa objeto
                 Dim resultado As String = _serializer.Serialize(dto)
                 Dim sendBytes As [Byte]() = Encoding.UTF8.GetBytes(resultado)
@@ -131,7 +148,7 @@ Public Class Componente
         Dim ctThread As Threading.Thread = New Threading.Thread(AddressOf esperaNovaConexao)
         ctThread.Start()
 
-        _listaPortasConectadas.Add(_porta)
+        _listaPortasAcordo.Add(_porta)
 
         Me.Text = "Componente " & _porta
         enviaMensagem("#porta", TipoEnvioMensagem.todosMenosEu)
@@ -155,15 +172,19 @@ Public Class Componente
                     Continue While
                 End If
                 If dto.mensagem.Contains("#solicitandoacordo") Then
-                    _listaPortasConectadas.Add(dto.porta)
+                    _listaPortasAcordo.Add(dto.porta)
                     socket.Close()
-                    retornaAcordo(dto.porta)
                     Continue While
                 End If
-                If dto.mensagem.Contains("#retornandoacordo") Then
-                    _listaPortasConectadas.Add(dto.porta)
+                If dto.mensagem.Contains("#solicitandovetoracordo") Then
+                    enviaMensagem("#vetor:" & _serializer.Serialize(_listaPortasAcordo), TipoEnvioMensagem.somentePorta, dto.porta)
                     socket.Close()
                     Continue While
+                End If
+                If dto.mensagem.Contains("#vetor") Then
+                    Dim vetor = _serializer.Deserialize(Of List(Of Integer))(dto.mensagem.Split(":")(1))
+
+                    '_listaPortasConectadas = _listaPortasConectadas.Where(Function(x) x)
                 End If
                 _localVirtualTime = Math.Max(_localVirtualTime, dto.timeStamp)
                 setStatus("[" & dto.porta & "] " & dto.mensagem)
@@ -176,14 +197,6 @@ Public Class Componente
 
     Private Sub solicitaAcordo()
         enviaMensagem("#solicitandoacordo", TipoEnvioMensagem.todosMenosEu)
-    End Sub
-
-    Private Sub retornaAcordo(porta As Integer)
-        enviaMensagem("#retornandoacordo", TipoEnvioMensagem.todosMenosEu, porta)
-    End Sub
-
-    Private Sub btnAcordo_Click(sender As Object, e As EventArgs) Handles btnAcordo.Click
-        solicitaAcordo()
     End Sub
 
 #End Region

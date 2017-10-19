@@ -29,6 +29,7 @@ Partial Class Componente
         Me.Label1 = New System.Windows.Forms.Label()
         Me.cmbPorta = New System.Windows.Forms.ComboBox()
         Me.btnAcordo = New System.Windows.Forms.Button()
+        Me.btnComparar = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'txtStatus
@@ -87,18 +88,28 @@ Partial Class Componente
         '
         'btnAcordo
         '
-        Me.btnAcordo.Location = New System.Drawing.Point(345, 22)
+        Me.btnAcordo.Location = New System.Drawing.Point(265, 22)
         Me.btnAcordo.Name = "btnAcordo"
         Me.btnAcordo.Size = New System.Drawing.Size(75, 23)
         Me.btnAcordo.TabIndex = 15
         Me.btnAcordo.Text = "Acordo"
         Me.btnAcordo.UseVisualStyleBackColor = True
         '
+        'btnComparar
+        '
+        Me.btnComparar.Location = New System.Drawing.Point(346, 22)
+        Me.btnComparar.Name = "btnComparar"
+        Me.btnComparar.Size = New System.Drawing.Size(75, 23)
+        Me.btnComparar.TabIndex = 16
+        Me.btnComparar.Text = "Comparar"
+        Me.btnComparar.UseVisualStyleBackColor = True
+        '
         'Componente
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(434, 348)
+        Me.Controls.Add(Me.btnComparar)
         Me.Controls.Add(Me.btnAcordo)
         Me.Controls.Add(Me.cmbPorta)
         Me.Controls.Add(Me.Label1)
@@ -120,4 +131,5 @@ Partial Class Componente
     Friend WithEvents Label1 As Label
     Friend WithEvents cmbPorta As ComboBox
     Friend WithEvents btnAcordo As Button
+    Friend WithEvents btnComparar As Button
 End Class
